@@ -1,0 +1,19 @@
+{
+    "name": "myutils_js",
+    "packageManager": "yarn@4.1.1",
+    "type": "commonjs",
+    "version": "1.0.0",
+    "exports": {
+        ".": {
+            "types": "./types/*",
+            "default": "./lib/*"
+        }
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.28",
+        "typescript": "^5.4.2"
+    },
+    "scripts": {
+        "prepack": "tsc -p tsconfig.json"
+    }
+}
