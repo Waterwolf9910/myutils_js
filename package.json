@@ -2,12 +2,13 @@
     "name": "myutils_js",
     "packageManager": "yarn@4.1.1",
     "type": "commonjs",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "exports": {
-        ".": {
+        "./*": {
             "types": "./types/*",
             "default": "./lib/*"
-        }
+        },
+        "./package.json": "./package.json"
     },
     "devDependencies": {
         "@types/node": "^20.11.28",
