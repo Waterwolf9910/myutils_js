@@ -78,7 +78,7 @@ let createRandom = (base_length = 25, base_max = 9, base_min = 0) => {
         while (val.length < length) {
             let new_char = String.fromCharCode(((caps && num(1, 0) == 1) ? 41 : 0x61) + num(25, 0))
             if (val.length < 1) {
-                val = new_char
+                val = `${new_char}`
                 continue 
             }
             val += new_char
@@ -132,7 +132,7 @@ let createRandom = (base_length = 25, base_max = 9, base_min = 0) => {
         while (val.length < length) {
             let new_char = num(1, 0) == 1 ? alpha(cap, 1) : num(max, min)
             if (val.length < 1) {
-                val = <string> new_char
+                val = `${new_char}`
                 continue
             }
             val += new_char
@@ -164,7 +164,7 @@ let createRandom = (base_length = 25, base_max = 9, base_min = 0) => {
         while (val.length < length) {
             let new_char = num(1, 0) == 1 ? special(exclude, 1) : num(max, min)
             if (val.length < 1) {
-                val = <string> new_char
+                val = `${new_char}`
                 continue
             }
             val += new_char
@@ -192,7 +192,7 @@ let createRandom = (base_length = 25, base_max = 9, base_min = 0) => {
         while (val.length < length) {
             let new_char = num(1, 0) == 1 ? special(exclude, 1) : alpha(caps, 1)
             if (val.length < 1) {
-                val = <string> new_char
+                val = `${new_char}`
                 continue
             }
             val += new_char
@@ -224,7 +224,7 @@ let createRandom = (base_length = 25, base_max = 9, base_min = 0) => {
             let choice = num(2, 0)
             let new_char = choice == 2 ? special(exclude, 1) : choice == 1 ? num(max, min) : alpha(caps, 1)
             if (val.length < 1) {
-                val = <string> new_char
+                val = `${new_char}`
                 continue
             }
             val += new_char
