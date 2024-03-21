@@ -2,7 +2,7 @@
     "name": "myutils_js",
     "packageManager": "yarn@4.1.1",
     "type": "commonjs",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "main": "./lib/index.js",
     "types": "./types/index.d.ts",
     "exports": {
