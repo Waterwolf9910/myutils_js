@@ -1,7 +1,7 @@
-import _random = require("./random");
+import _random from "./random.js";
 let random = _random(0, 9)
 
-export = {
+export default {
     array: {
         /**
          * 

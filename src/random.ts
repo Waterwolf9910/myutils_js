@@ -1,4 +1,4 @@
-import assert = require('assert/strict')
+import * as assert from 'assert/strict'
 
 let doNumberCheck = (num: number) => {
     if (typeof num != 'number' || isNaN(num)) {
@@ -15,7 +15,7 @@ let checkMaxMin = (max: number, min: number) => assert.notEqual(max < min, true,
  * @param base_min The min number [0-9] to use in number generation
  * @returns a list of random generator functions
  */
-let createRandom = (base_length = 25, base_max = 9, base_min = 0) => {
+export const createRandom = (base_length = 25, base_max = 9, base_min = 0) => {
 
     let doBaseCheck = (max: number, min: number) => {
         doNumberCheck(max)
@@ -256,4 +256,4 @@ let createRandom = (base_length = 25, base_max = 9, base_min = 0) => {
     
 }
 
-export = createRandom
+export default createRandom

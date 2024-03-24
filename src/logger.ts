@@ -1,9 +1,9 @@
-import old_console = require("console")
-import fs = require("fs")
-import util = require("util")
-import path = require("path")
+import * as console from "console"
+import * as fs from "fs"
+import * as util from "util"
+import * as path from "path"
 
-class Logger extends old_console.Console {
+export class Logger extends console.Console {
     readonly debug = (message: any, ...optionalParams: any[]) => {
         let time = this.getTime()
         let filemsg
@@ -191,19 +191,11 @@ class Logger extends old_console.Console {
     // }
     constructor(logfile = "bot.log", stdout = process.stdout, stderr = process.stderr, ignoreErrors = true) {
         super({ stdout: stdout, stderr: stderr, ignoreErrors: ignoreErrors, groupIndentation: 4, })
-        this.logfile = logfile
+        this.logfile = path.resolve(logfile)
     }
     private logfile: string
-    Console = old_console.Console
+    Console = console.Console
     Logger = Logger
 }
 
-// class ApplicationError extends Error {
-
-// }
-
-// export default Logger
-
-module.exports = Logger
-
-export = Logger
+export default Logger

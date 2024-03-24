@@ -14,9 +14,7 @@ export enum bmp_compressions {
     BI_RLE8,
     BI_RLE4,
     BI_BITFIELDS,
-    BI_JPEG,
-    BI_PNG,
-    BI_ALPHABITFIELDS,
+    BI_ALPHABITFIELDS = 5,
     BI_CMYK = 11,
     BI_CMYKRLE8,
     BI_CMYKRLE4
@@ -49,8 +47,16 @@ export enum RenderingIntent {
     LCS_GM_IMAGES
 }
 
+export enum HeaderType {
+    info,
+    v2,
+    v3,
+    v4,
+    v5
+}
+
 export type bmp_infoheader = {
-    type: 'info',
+    type: HeaderType.info,
     header_size: number,
     width: number,
     height: number,
@@ -65,19 +71,19 @@ export type bmp_infoheader = {
 }
 
 export type bmp_v2infoheader = Omit<bmp_infoheader, 'type'> & {
-    type: 'v2'
+    type: HeaderType.v2
     red_mask: number,
     green_mask: number,
     blue_mask: number,
 }
 
 export type bmp_v3infoheader = Omit<bmp_v2infoheader, 'type'> & {
-    type: 'v3'
+    type: HeaderType.v3
     alpha_mask: number,
 }
 
 export type bmp_v4header = Omit<bmp_v3infoheader, 'type'> & {
-    type: 'v4'
+    type: HeaderType.v4
     cs_type: ColorSpaceType,
     endpoints: CIEXYZTRIPLE,
     gamma_red: number,
@@ -86,7 +92,7 @@ export type bmp_v4header = Omit<bmp_v3infoheader, 'type'> & {
 }
 
 export type bmp_v5header = Omit<bmp_v4header, 'type'> & {
-    type: 'v5'
+    type: HeaderType.v5
     intent: RenderingIntent,
     profile_data: number,
     profile_size: number,
@@ -111,48 +117,65 @@ export type parsed_bmp = {
             b: number,
             /**
              * Encoded as RGB
-             */
+            */
             hex_encoded: string
         }
     },
     /**
      * img width*height
-     */
-    length: number
+    */
+   length: number
 }
 
-export const createReader = (buf: Buffer) => {
+/**
+ * Buffer's read operations with holding offset
+*/
+export interface Reader {
+    readByte: () => number,
+    /**SWord */
+    readInt16: () => number,
+    /**SDWord */
+    readInt32: () => number,
+    /**SQWord */
+    readInt64: () => bigint,
+    readUByte: () => number,
+    /**Word */
+    readUInt16: () => number,
+    /**DWord */
+    readUInt32: () => number,
+    /**QWord */
+    readUInt64: () => bigint,
+    get length(): number
+    get offset(): number
+    set offset(val: number)
+}
+
+export const createReader = (buf: Buffer): Reader => {
     let offset = 0
 
     return {
         readByte: () => buf.readInt8(offset++),
-        /**SWord */
         readInt16: () => {
             offset += 2
             return buf.readInt16LE(offset - 2)
         },
-        /**SDWord */
         readInt32: () => {
             offset += 4
             return buf.readInt32LE(offset - 4)
         },
-        /**SQWord */
         readInt64: () => {
             offset += 8
             return buf.readBigInt64LE(offset - 8)
         },
         readUByte: () => buf[offset++],
-        /**Word */
         readUInt16: () => {
             offset += 2
             return buf.readUInt16LE(offset - 2)
         },
-        /**DWord */
         readUInt32: () => {
             offset += 4
             return buf.readUInt32LE(offset - 4)
         },
-        /**QWord */
         readUInt64: () => {
             offset += 8
             return buf.readBigUInt64LE(offset - 8)
@@ -170,25 +193,10 @@ export const createReader = (buf: Buffer) => {
     }
 }
 
-export const bmp_parser = (data: ArrayBuffer): parsed_bmp => {
-    let reader = createReader(Buffer.from(data))
-    let file_header: bmp_file_header = {
-        size: 0,
-        data_offset: 0,
-        reserved_1: 0,
-        reserved_2: 0
-    }
-    // This is the magic header for bitmap images
-    if (reader.readUInt16() != 0x4d42) {
-        throw "Buffer does not start with Bitmap Magic Number or this magic number has not been implemented yet"
-    }
-    file_header.size = reader.readUInt32()
-    file_header.reserved_1 = reader.readUInt16()
-    file_header.reserved_2 = reader.readUInt16()
-    file_header.data_offset = reader.readUInt32()
+export const parseHeader = (reader: ReturnType<typeof createReader>) => {
     let header_size = reader.readUInt32()
     let _header: bmp_header
-    let base_header = {
+    let base_header = { // All headers have these fields
         header_size,
         width: reader.readInt32(),
         height: reader.readInt32(),
@@ -203,17 +211,17 @@ export const bmp_parser = (data: ArrayBuffer): parsed_bmp => {
     }
 
     switch (header_size) {
-        case 40: {
+        case 40: { // Info length is 40
             let header: bmp_header = {
-                type: "info",
+                type: HeaderType.info,
                 ...base_header
             }
             _header = header
             break
         }
-        case 52: {
+        case 52: { // Header v2 is 52 (+ rgb masks)
             let header: bmp_header = {
-                type: "v2",
+                type: HeaderType.v2,
                 ...base_header,
                 red_mask: reader.readUInt32(),
                 green_mask: reader.readUInt32(),
@@ -222,9 +230,9 @@ export const bmp_parser = (data: ArrayBuffer): parsed_bmp => {
             _header = header
             break
         }
-        case 56: {
+        case 56: { // Header v3 is 56 (+ alpha mask)
             let header: bmp_header = {
-                type: "v3",
+                type: HeaderType.v3,
                 ...base_header,
                 red_mask: reader.readUInt32(),
                 green_mask: reader.readUInt32(),
@@ -234,9 +242,9 @@ export const bmp_parser = (data: ArrayBuffer): parsed_bmp => {
             _header = header
             break
         }
-        case 108: {
+        case 108: { // Header v4 is 108
             let header: bmp_header = {
-                type: "v4",
+                type: HeaderType.v4,
                 ...base_header,
                 red_mask: reader.readUInt32(),
                 green_mask: reader.readUInt32(),
@@ -267,9 +275,9 @@ export const bmp_parser = (data: ArrayBuffer): parsed_bmp => {
             _header = header
             break
         }
-        case 124: {
+        case 124: { // Header v5 is 124
             let header: bmp_v5header = {
-                type: 'v5',
+                type: HeaderType.v5,
                 ...base_header,
                 red_mask: reader.readUInt32(),
                 green_mask: reader.readUInt32(),
@@ -310,6 +318,26 @@ export const bmp_parser = (data: ArrayBuffer): parsed_bmp => {
             // console.warn("This type of bitmap format is not yet implemented, header data may be incomplete")
         }
     }
+    return _header
+}
+
+export const bmpParser = (data: ArrayBuffer): parsed_bmp => {
+    let reader = createReader(Buffer.from(data))
+    let file_header: bmp_file_header = {
+        size: 0,
+        data_offset: 0,
+        reserved_1: 0,
+        reserved_2: 0
+    }
+    // This is the magic header for bitmap images
+    if (reader.readUInt16() != 0x4d42) {
+        throw "Buffer does not start with Bitmap Magic Number or this magic number has not been implemented yet"
+    }
+    file_header.size = reader.readUInt32()
+    file_header.reserved_1 = reader.readUInt16()
+    file_header.reserved_2 = reader.readUInt16()
+    file_header.data_offset = reader.readUInt32()
+    let header = parseHeader(reader)    
     /**
      * Index = y.toString(2).padStart(5, 0) + x.toString(2).padStart(5, 0)
      * 
@@ -318,21 +346,23 @@ export const bmp_parser = (data: ArrayBuffer): parsed_bmp => {
     let pixel_data: parsed_bmp['pixel_data'] = {}
     let length = 0
     reader.offset = file_header.data_offset
-    switch (_header.compression) {
+    switch (header.compression) {
         case bmp_compressions.BI_ALPHABITFIELDS:
         case bmp_compressions.BI_BITFIELDS:
         case bmp_compressions.BI_RGB: {
             let read_to: (index: string) => any;
-            switch (_header.color_depth) {
+            switch (header.color_depth) {
                 case 16: {
                     read_to = (index) => {
                         let colors = reader.readUInt16()
                         pixel_data[index] = {
-                            a: colors & (<bmp_v3infoheader> _header).alpha_mask,
-                            r: colors & (<bmp_v3infoheader> _header).red_mask,
-                            g: colors & (<bmp_v3infoheader> _header).green_mask,
-                            b: colors & (<bmp_v3infoheader> _header).blue_mask,
+                            r: ((colors & (<bmp_v3infoheader> header).red_mask) >> 10) << 3,
+                            g: ((colors & (<bmp_v3infoheader> header).green_mask) >> 5) << 3,
+                            b: (colors & (<bmp_v3infoheader> header).blue_mask) << 3,
                             hex_encoded: colors.toString(16).padStart(16, '0')
+                        }
+                        if (header.type != HeaderType.info && header.type != HeaderType.v2) {
+                            pixel_data[index].a = (colors & header.alpha_mask) >> 15
                         }
                     }
                     break
@@ -353,46 +383,41 @@ export const bmp_parser = (data: ArrayBuffer): parsed_bmp => {
                 }
                 case 32: {
                     read_to = (index) => {
-                        let a = reader.readUByte()
-                        let b = reader.readUByte()
-                        let g = reader.readUByte()
-                        let r = reader.readUByte()
+                        let data = reader.readUInt32()
                         pixel_data[index] = {
-                            a,
-                            r,
-                            g,
-                            b,
-                            hex_encoded: r.toString(16).padStart(2, '0') + g.toString(16).padStart(2, '0') + b.toString(16).padStart(2, '0')
+                            a: (data & (<bmp_v3infoheader>header).alpha_mask) >>> 24,
+                            r: (data & (<bmp_v3infoheader> header).red_mask) >>> 16,
+                            g: (data & (<bmp_v3infoheader> header).green_mask) >>> 8,
+                            b: (data & (<bmp_v3infoheader> header).blue_mask),
+                            hex_encoded: data.toString(16)
                         }
                     }
                     break
                 }
                 default: {
-                    throw `Color Depth (${_header.color_depth}) Not Yet Implemented`
+                    throw `Color Depth (${header.color_depth}) Not Yet Implemented`
                 }
             }
-            if (_header.height > 0) {
-                for (let y = _header.height; y > 0; --y) {
-                    let upper_index = (y-1).toString(2) //.padStart(5, '0') // padding for debug readablity 
-                    for (let x = 1; x <= _header.width; ++x) {
-                        let lower_index = (x-1).toString(2) // .padStart(5, '0')
-                        read_to(upper_index + lower_index)
-                        ++length
-                    }
+            for (let y = header.height > 0 ? header.height : 0; header.height > 0 ? y > 0 : y > header.height; header.height > 0 ? --y : ++y) {
+                let upper_index = (header.height > 0 ? y-1 : y+1).toString(2) //.padStart(5, '0') // padding for debug readablity 
+                for (let x = 1; x <= header.width; ++x) {
+                    let lower_index = (x-1).toString(2) // .padStart(5, '0')
+                    read_to(upper_index + lower_index)
+                    ++length
                 }
             }
             break
         }
         default: {
-            throw `Compression [${bmp_compressions[_header.compression]}]: Not Yet Implemented`
+            throw `Compression [${bmp_compressions[header.compression]}]: Not Yet Implemented`
         }
     }
     return {
         file_header,
-        header: _header,
+        header: header,
         pixel_data,
         length
     }
 }
 
-export default bmp_parser
+export default bmpParser
