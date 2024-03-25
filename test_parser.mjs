@@ -19,5 +19,8 @@ for (let filename of fs.readdirSync("./test_imgs").filter(v => v.endsWith(".bmp"
     }
     console.log(file.length)
     console.log(img.file_header, img.header)
+    if (img.length != Object.keys(img.pixel_data).length) {
+        throw "Image length != pixel length"
+    }
     fs.writeFileSync(`./parsed_imgs/${filename}.parsed`, JSON.stringify(img, null, 4))
 }

@@ -105,7 +105,7 @@ export type parsed_bmp = {
     file_header: bmp_file_header,
     header: bmp_header,
     /**
-     * Index = y.toString(2).padStart(5, 0) + x.toString(2).padStart(5, 0)
+     * Index = y.toString(2).padStart(header.height.length - 1, 0) + x.toString(2).padStart(header.width.length - 1, 0)
      * 
      * Temp Key solution (currently expects 32x32) [Should work with any size, just very big string] 
      */
@@ -321,6 +321,16 @@ export const parseHeader = (reader: ReturnType<typeof createReader>) => {
     return _header
 }
 
+/**
+ * Utility to get index from (x,y) (w,h) pair
+ * @param x the x position of the pixel
+ * @param y the y position of the pixel
+ * @param width the width of the image (header.width)
+ * @param height the height of the image (header.height)
+ * @returns the index of the requested pixel
+ */
+export const xyToIndex = (x: number, y: number, width: number, height: number) => y.toString(2).padStart(height.toString(2).length - 1, '0') + x.toString(2).padStart(width.toString(2).length - 1, '0')
+
 export const bmpParser = (data: ArrayBuffer): parsed_bmp => {
     let reader = createReader(Buffer.from(data))
     let file_header: bmp_file_header = {
@@ -405,9 +415,9 @@ export const bmpParser = (data: ArrayBuffer): parsed_bmp => {
                 }
             }
             for (let y = header.height > 0 ? header.height : 0; header.height > 0 ? y > 0 : y > header.height; header.height > 0 ? --y : ++y) {
-                let upper_index = (header.height > 0 ? y-1 : y+1).toString(2) //.padStart(5, '0') // padding for debug readablity 
+                let upper_index = (header.height > 0 ? y - 1 : y + 1).toString(2).padStart(header.height.toString(2).length - 1, '0') // padding for debug readablity 
                 for (let x = 1; x <= header.width; ++x) {
-                    let lower_index = (x-1).toString(2) // .padStart(5, '0')
+                    let lower_index = (x-1).toString(2).padStart(header.width.toString(2).length - 1, '0')
                     read_to(upper_index + lower_index)
                     ++length
                 }
