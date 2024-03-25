@@ -8,7 +8,7 @@ fs.mkdirSync("./parsed_imgs", { recursive: true })
 for (let filename of fs.readdirSync("./test_imgs").filter(v => v.endsWith(".bmp"))) {
     let file = fs.readFileSync(`./test_imgs/${filename}`)
     /**
-     * @type {import('./src/bmp_parser').parsed_bmp}
+     * @type {import('./src/bmp_parser.js').parsed_bmp}
      */
     let img
     try {

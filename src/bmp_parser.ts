@@ -111,12 +111,12 @@ export type parsed_bmp = {
      */
     pixel_data: {
         [pos: string]: {
-            a?: number
+            a: number
             r: number,
             g: number,
             b: number,
             /**
-             * Encoded as RGB
+             * Encoded as ARGB
             */
             hex_encoded: string
         }
@@ -356,14 +356,16 @@ export const bmpParser = (data: ArrayBuffer): parsed_bmp => {
                     read_to = (index) => {
                         let colors = reader.readUInt16()
                         pixel_data[index] = {
-                            r: ((colors & (<bmp_v3infoheader> header).red_mask) >> 10) << 3,
-                            g: ((colors & (<bmp_v3infoheader> header).green_mask) >> 5) << 3,
+                            a: (<bmp_v3infoheader> header).alpha_mask ? ((colors & (<bmp_v3infoheader> header).alpha_mask) >> 15) ? 255 : 0 : 255,
+                            r: ((<bmp_v3infoheader> header).green_mask == 0x07e0 ? ((colors & (<bmp_v3infoheader> header).red_mask) >>> 11) : (colors & (<bmp_v3infoheader> header).red_mask) >>> 10) << 3,
+                            g: ((<bmp_v3infoheader> header).green_mask == 0x07e0 ? ((colors & (<bmp_v3infoheader> header).green_mask) >> 6) : ((colors & (<bmp_v3infoheader> header).green_mask) >> 5)) << 3,
                             b: (colors & (<bmp_v3infoheader> header).blue_mask) << 3,
-                            hex_encoded: colors.toString(16).padStart(16, '0')
+                            hex_encoded: '' //colors.toString(16).padStart(4, '0')
                         }
-                        if (header.type != HeaderType.info && header.type != HeaderType.v2) {
-                            pixel_data[index].a = (colors & header.alpha_mask) >> 15
-                        }
+                        pixel_data[index].hex_encoded = pixel_data[index].a.toString(16).padStart(2, '0') +
+                            pixel_data[index].r.toString(16).padStart(2, '0') +
+                            pixel_data[index].g.toString(16).padStart(2, '0') +
+                            pixel_data[index].b.toString(16).padStart(2, '0')
                     }
                     break
                 }
@@ -373,10 +375,14 @@ export const bmpParser = (data: ArrayBuffer): parsed_bmp => {
                         let g = reader.readUByte()
                         let r = reader.readUByte()
                         pixel_data[index] = {
+                            a: 255,
                             r,
                             g,
                             b,
-                            hex_encoded: r.toString(16).padStart(2, '0') + g.toString(16).padStart(2, '0') + b.toString(16).padStart(2, '0')
+                            hex_encoded: 'ff' +
+                                r.toString(16).padStart(2, '0') +
+                                g.toString(16).padStart(2, '0') +
+                                b.toString(16).padStart(2, '0')
                         }
                     }
                     break
@@ -385,11 +391,11 @@ export const bmpParser = (data: ArrayBuffer): parsed_bmp => {
                     read_to = (index) => {
                         let data = reader.readUInt32()
                         pixel_data[index] = {
-                            a: (data & (<bmp_v3infoheader>header).alpha_mask) >>> 24,
+                            a: (<bmp_v3infoheader> header).alpha_mask ? (data & (<bmp_v3infoheader>header).alpha_mask) >>> 24 : 255,
                             r: (data & (<bmp_v3infoheader> header).red_mask) >>> 16,
                             g: (data & (<bmp_v3infoheader> header).green_mask) >>> 8,
                             b: (data & (<bmp_v3infoheader> header).blue_mask),
-                            hex_encoded: data.toString(16)
+                            hex_encoded: data.toString(16).padStart(8, '0')
                         }
                     }
                     break
