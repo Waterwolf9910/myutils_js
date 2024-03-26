@@ -1,5 +1,5 @@
 {
-    "name": "myutils_js",
+    "name": "wolf_utils",
     "packageManager": "yarn@4.1.0",
     "type": "commonjs",
     "license": "MIT",
