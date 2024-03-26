@@ -19,6 +19,8 @@ jobs:
       - run: corepack enable yarn
       - run: yarn install --immutable
       - run: yarn test
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
 
   publish-npm:
     needs: build
