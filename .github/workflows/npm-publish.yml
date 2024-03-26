@@ -11,13 +11,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+        NODE_AUTH_TOKEN: ${{secrets.npm_token}}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
       - run: |
           corepack enable yarn
           yarn install --immutable
@@ -26,14 +26,14 @@ jobs:
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
+    env:
+        NODE_AUTH_TOKEN: ${{secrets.npm_token}}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/
-      - env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
       - run: |
           corepack enable yarn
           yarn install --immutable
