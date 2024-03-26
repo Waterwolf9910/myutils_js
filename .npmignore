@@ -7,4 +7,4 @@ tsconfig.json
 .npmignore
 test_imgs
 parsed_imgs
-test_parser.js
+test_parser.mjs
