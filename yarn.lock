@@ -14,15 +14,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"myutils_js@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "myutils_js@workspace:."
-  dependencies:
-    "@types/node": "npm:^20.11.30"
-    typescript: "npm:5.3.3"
-  languageName: unknown
-  linkType: soft
-
 "typescript@npm:5.3.3":
   version: 5.3.3
   resolution: "typescript@npm:5.3.3"
@@ -49,3 +40,12 @@ __metadata:
   checksum: 10c0/bb673d7876c2d411b6eb6c560e0c571eef4a01c1c19925175d16e3a30c4c428181fb8d7ae802a261f283e4166a0ac435e2f505743aa9e45d893f9a3df017b501
   languageName: node
   linkType: hard
+
+"wolf_utils@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "wolf_utils@workspace:."
+  dependencies:
+    "@types/node": "npm:^20.11.30"
+    typescript: "npm:5.3.3"
+  languageName: unknown
+  linkType: soft
