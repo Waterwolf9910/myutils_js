@@ -1,5 +1,5 @@
 import fs from "fs"
-import pkg from "."
+import pkg from "./lib/index.js"
 const {bmpParser, bmpWritter, HeaderType} = pkg.bmp_parser
 
 fs.mkdirSync("./parsed_imgs", { recursive: true })
