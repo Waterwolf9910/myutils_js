@@ -36,7 +36,7 @@ jobs:
           echo ver=$(node -e "let manifest = require('./package.json'); console.log(manifest.version)") >> "${GITHUB_OUTPUT}"
           echo last_tag=$(git describe --tags --abbrev=0) >> "${GITHUB_OUTPUT}"
       - run: echo ${{ steps.update_release.outputs.ver }} ${{ steps.update_release.outputs.last_tag }}
-      - if: ${{ steps.update_release.outputs.ver == steps.update_release.outputs.last_tag }}
+      - if: ${{ steps.update_release.outputs.ver != steps.update_release.outputs.last_tag }}
         run: |
           curl -X POST \
           -H "Accept: application/vnd.github+json" \
