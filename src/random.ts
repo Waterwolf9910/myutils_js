@@ -1,12 +1,10 @@
-import * as assert from 'assert/strict'
-
 let doNumberCheck = (num: number) => {
     if (typeof num != 'number' || isNaN(num)) {
         throw new SyntaxError(`${num} is not a number`)
     }
 }
 
-let checkMaxMin = (max: number, min: number) => assert.notEqual(max < min, true, new SyntaxError(`max cannot be less then min (${max} < ${min})`))
+let checkMaxMin = (max: number, min: number) => {if (max < min) throw new SyntaxError(`max cannot be less then min (${max} < ${min})`)}
 
 /**
  * Creates a list of random generators

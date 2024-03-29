@@ -1,6 +1,6 @@
 {
     "name": "wolf_utils",
-    "packageManager": "yarn@4.1.0",
+    "packageManager": "yarn@4.1.1",
     "type": "commonjs",
     "license": "MIT",
     "author": {
@@ -8,9 +8,9 @@
     },
     "repository": {
         "type": "git",
-        "url": "github:Waterwolf9910/myutils_js"
+        "url": "https://github.com/Waterwolf9910/myutils_js"
     },
-    "version": "1.4.0",
+    "version": "1.4.1",
     "main": "./lib/index.js",
     "types": "./types/index.d.ts",
     "exports": {
