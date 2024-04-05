@@ -48,5 +48,5 @@ jobs:
 
       - if: ${{ steps.update_release.outputs.ver != steps.update_release.outputs.last_tag }}
         name: Push to NPM Registry
-        uses: ./.github/workflows/npm-publish.yml@main
+        uses: ./.github/workflows/npm-publish.yml
         
