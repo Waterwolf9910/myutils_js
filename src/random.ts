@@ -195,6 +195,8 @@ export const createRandom = (base_length = 25, base_max = 9, base_min = 0) => {
             }
             val += new_char
         }
+
+        return val
     }
 
     /**
