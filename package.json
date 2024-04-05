@@ -10,7 +10,7 @@
         "type": "git",
         "url": "https://github.com/Waterwolf9910/myutils_js"
     },
-    "version": "1.4.1",
+    "version": "1.4.2",
     "main": "./lib/index.js",
     "types": "./types/index.d.ts",
     "exports": {
