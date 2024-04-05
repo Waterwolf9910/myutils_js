@@ -24,8 +24,8 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     outputs:
-      ver: ${{ steps.release.outputs.ver }}
-      last_tag: ${{ steps.release.outputs.last_tag }}
+      ver: ${{ steps.check_release.outputs.ver }}
+      last_tag: ${{ steps.check_release.outputs.last_tag }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,7 +34,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - id: update_release
+      - id: check_release
         run: |
           echo ver=$(node -e "let manifest = require('./package.json'); console.log(manifest.version)") >> "${GITHUB_OUTPUT}"
           echo last_tag=$(git describe --tags --abbrev=0) >> "${GITHUB_OUTPUT}"
