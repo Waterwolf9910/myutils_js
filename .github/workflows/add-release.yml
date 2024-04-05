@@ -23,6 +23,9 @@ jobs:
     name: "Check if new version and release"
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      ver: ${{ steps.release.outputs.ver }}
+      last_tag: ${{ steps.release.outputs.last_tag }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,8 +48,7 @@ jobs:
           -H "Authorization: Bearer ${{github.token}}" \
           https://api.github.com/repos/${{ github.repository }}/releases \
           -d '{ "tag_name": "${{ steps.update_release.outputs.ver }}", "target_commitish": "main", "generate_release_notes": true}'
-
-      - if: ${{ steps.update_release.outputs.ver != steps.update_release.outputs.last_tag }}
-        name: Push to NPM Registry
-        uses: ./.github/workflows/npm-publish.yml
-        
+  publish:
+    needs: get_and_release
+    if: ${{ needs.get_and_release.outputs.ver != needs.get_and_release.outputs.last_tag }}
+    uses: ./.github/workflows/npm-publish.yml
