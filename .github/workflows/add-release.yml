@@ -38,8 +38,8 @@ jobs:
         run: |
           echo ver=$(node -e "let manifest = require('./package.json'); console.log(manifest.version)") >> "${GITHUB_OUTPUT}"
           echo last_tag=$(git describe --tags --abbrev=0) >> "${GITHUB_OUTPUT}"
-      - run: echo ${{ steps.update_release.outputs.ver }} ${{ steps.update_release.outputs.last_tag }}
-      - if: ${{ steps.update_release.outputs.ver != steps.update_release.outputs.last_tag }}
+      - run: echo ${{ steps.check_release.outputs.ver }} ${{ steps.check_release.outputs.last_tag }}
+      - if: ${{ steps.check_release.outputs.ver != steps.check_release.outputs.last_tag }}
         name: Add Release
         id: release
         run: |
@@ -47,7 +47,7 @@ jobs:
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: Bearer ${{github.token}}" \
           https://api.github.com/repos/${{ github.repository }}/releases \
-          -d '{ "tag_name": "${{ steps.update_release.outputs.ver }}", "target_commitish": "main", "generate_release_notes": true}'
+          -d '{ "tag_name": "${{ steps.check_release.outputs.ver }}", "target_commitish": "main", "generate_release_notes": true}'
   publish:
     needs: get_and_release
     if: ${{ needs.get_and_release.outputs.ver != needs.get_and_release.outputs.last_tag }}

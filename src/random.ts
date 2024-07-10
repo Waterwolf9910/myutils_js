@@ -74,7 +74,7 @@ export const createRandom = (base_length = 25, base_max = 9, base_min = 0) => {
 
         let val = ''
         while (val.length < length) {
-            let new_char = String.fromCharCode(((caps && num(1, 0) == 1) ? 41 : 0x61) + num(25, 0))
+            let new_char = String.fromCharCode(((caps && num(1, 0) == 1) ? 0x41 : 0x61) + num(25, 0))
             if (val.length < 1) {
                 val = `${new_char}`
                 continue 
