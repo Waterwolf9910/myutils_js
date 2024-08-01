@@ -12,7 +12,7 @@ jobs:
   publish-npm:
     runs-on: ubuntu-latest
     env:
-        NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+        NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
         NODE_PUBLISH_URL: https://registry.npmjs.org/
     steps:
       - uses: actions/checkout@v4
