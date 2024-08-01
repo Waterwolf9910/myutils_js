@@ -12,7 +12,6 @@ export const array = {
         if (array == null) {
             throw new SyntaxError("array cannot be null");
         }
-
         let newIndex = curIndex;
 
         let size = array.length;
@@ -29,7 +28,16 @@ export const array = {
             let temp = array[size];
             array[size] = array[i];
             array[i] = temp;
+        }
 
+        for (let i = 0; i < array.length; ++i) { 
+            let item = array.shift();
+            if (item != null) {
+                array.push(item)
+            }
+        }
+        if (array[0] == null) { // The above doesn't always seem to clean up fully?
+            array.unshift()
         }
         return newIndex;
     }
